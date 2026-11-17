@@ -85,6 +85,9 @@ async function main(): Promise<void> {
   });
   const address = server.address();
   if (address === null || typeof address === 'string') throw new Error('the server did not bind an ephemeral TCP port');
+  // Port 0 asks the kernel for a free port, but the kernel may hand back 8080, which the env owns.
+  // Refuse it instead of registering a port the env would mistake for its own.
+  if (address.port === 8080) throw new Error('the kernel bound port 8080, which the env owns');
   process.stdout.write(`[entry] listening on port ${address.port}\n`);
 
   await register(address.port);
